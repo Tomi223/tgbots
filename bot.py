@@ -5,8 +5,8 @@ import os
 import re
 import math
 
-TOKEN = os.environ.get("TOKEN")
-BOT_USERNAME = "your_bot_username"  # без @, например: "quadratic_math_bot"
+TOKEN = os.environ.get("7557401455:AAEgd82mh4srSqmcAwmzXVqb8ZYXQHLvqRM")
+BOT_USERNAME = "QuadraticEquations1_bot"
 
 app = Flask(__name__)
 telegram_app = ApplicationBuilder().token(TOKEN).build()
