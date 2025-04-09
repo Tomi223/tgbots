@@ -1,3 +1,4 @@
+
 import re
 import os
 from flask import Flask, request
@@ -5,7 +6,7 @@ from telegram import Update, Bot
 from telegram.ext import Application, MessageHandler, ContextTypes, filters
 
 TOKEN = os.getenv("7557401455:AAEgd82mh4srSqmcAwmzXVqb8ZYXQHLvqRM")
-HOSTNAME = os.getenv("QuadraticEquations1_bot")
+HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 
 WEBHOOK_PATH = f"/{TOKEN}"
 WEBHOOK_URL = f"https://{HOSTNAME}{WEBHOOK_PATH}"
@@ -15,7 +16,6 @@ app = Flask(__name__)
 
 telegram_app = Application.builder().token(TOKEN).build()
 
-# 📘 Метод дискриминанта
 def solve_by_discriminant(a, b, c):
     D = b**2 - 4*a*c
     steps = f"D = {b}² - 4×{a}×{c} = {D}\n"
@@ -30,7 +30,6 @@ def solve_by_discriminant(a, b, c):
         steps += f"Два корня: x₁ = {x1}, x₂ = {x2}"
     return steps
 
-# 📗 Метод Виета
 def solve_by_vieta(a, b, c):
     if a == 0:
         return "Уравнение не квадратное."
@@ -47,7 +46,6 @@ def solve_by_vieta(a, b, c):
         x2 = (-b - D**0.5) / (2*a)
         return f"Корни по Виете: x₁ = {x1}, x₂ = {x2}\nПроверка: x₁+x₂ = {x1+x2}, x₁×x₂ = {x1*x2}"
 
-# 📙 Метод выделения полного квадрата
 def solve_by_square_completion(a, b, c):
     if a == 0:
         return "Не квадратное уравнение."
@@ -55,7 +53,6 @@ def solve_by_square_completion(a, b, c):
     completed = f"(x + {h})² = {h**2 - c/a}" if a > 0 else f"(x - {abs(h)})² = {h**2 - c/a}"
     return f"Приводим уравнение к виду: {a}(x + {b/(2*a)})² = {b**2/(4*a**2) - c/a}\nУпрощённо: {completed}"
 
-# 📐 Парсинг уравнения из строки
 def parse_equation(equation: str):
     equation = equation.replace(" ", "").replace("^2", "**2").replace("=0", "")
     match = re.match(r"([+-]?\d*)x\*\*2([+-]\d*)x([+-]\d+)", equation)
@@ -67,7 +64,6 @@ def parse_equation(equation: str):
     c = int(c)
     return a, b, c
 
-# 📩 Обработка сообщений
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
     parsed = parse_equation(text)
@@ -90,16 +86,13 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """
     await update.message.reply_text(result)
 
-# 🧠 Добавляем хендлер
 telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
 
-# 🌐 Flask endpoint для Webhook
 @app.route(WEBHOOK_PATH, methods=["POST"])
 async def webhook() -> str:
     await telegram_app.update_queue.put(Update.de_json(request.get_json(force=True), bot))
     return "ok"
 
-# 🚀 Запуск
 async def main():
     await bot.set_webhook(url=WEBHOOK_URL)
     await telegram_app.initialize()
