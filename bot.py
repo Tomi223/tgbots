@@ -5,8 +5,8 @@ from flask import Flask, request
 from telegram import Update, Bot
 from telegram.ext import Application, MessageHandler, ContextTypes, filters
 
-TOKEN = os.getenv("7557401455:AAEgd82mh4srSqmcAwmzXVqb8ZYXQHLvqRM")
-HOSTNAME = os.getenv("https://tgbots-3.onrender.com")
+TOKEN = os.getenv("TOKEN")
+HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 
 WEBHOOK_PATH = f"/{TOKEN}"
 WEBHOOK_URL = f"https://{HOSTNAME}{WEBHOOK_PATH}"
