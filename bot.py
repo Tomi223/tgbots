@@ -53,4 +53,59 @@ def solve_by_square_completion(a, b, c):
         return "Не квадратное уравнение."
     h = b / (2*a)
     completed = f"(x + {h})² = {h**2 - c/a}" if a > 0 else f"(x - {abs(h)})² = {h**2 - c/a}"
-    return f"Приводим уравнение к виду: {a}(x + {
+    return f"Приводим уравнение к виду: {a}(x + {b/(2*a)})² = {b**2/(4*a**2) - c/a}\nУпрощённо: {completed}"
+
+# 📐 Парсинг уравнения из строки
+def parse_equation(equation: str):
+    equation = equation.replace(" ", "").replace("^2", "**2").replace("=0", "")
+    match = re.match(r"([+-]?\d*)x\*\*2([+-]\d*)x([+-]\d+)", equation)
+    if not match:
+        return None
+    a, b, c = match.groups()
+    a = int(a) if a not in ("", "+", "-") else int(a + "1") if a else 1
+    b = int(b) if b not in ("", "+", "-") else int(b + "1") if b else 1
+    c = int(c)
+    return a, b, c
+
+# 📩 Обработка сообщений
+async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text.strip()
+    parsed = parse_equation(text)
+    if not parsed:
+        await update.message.reply_text("Некорректный формат. Пример: 2x^2 - 4x + 2 = 0")
+        return
+
+    a, b, c = parsed
+
+    result = f"""Решаем уравнение: {a}x² + {b}x + {c} = 0
+
+📘 Метод дискриминанта:
+{solve_by_discriminant(a, b, c)}
+
+📗 Метод Виета:
+{solve_by_vieta(a, b, c)}
+
+📙 Метод выделения полного квадрата:
+{solve_by_square_completion(a, b, c)}
+"""
+    await update.message.reply_text(result)
+
+# 🧠 Добавляем хендлер
+telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
+
+# 🌐 Flask endpoint для Webhook
+@app.route(WEBHOOK_PATH, methods=["POST"])
+async def webhook() -> str:
+    await telegram_app.update_queue.put(Update.de_json(request.get_json(force=True), bot))
+    return "ok"
+
+# 🚀 Запуск
+async def main():
+    await bot.set_webhook(url=WEBHOOK_URL)
+    await telegram_app.initialize()
+    await telegram_app.start()
+    await telegram_app.updater.start_polling()
+
+import asyncio
+if __name__ == "__main__":
+    asyncio.run(main())
