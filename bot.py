@@ -13,7 +13,7 @@ WEBHOOK_URL = f"https://{HOSTNAME}{WEBHOOK_PATH}"
 
 bot = Bot(token=TOKEN)
 app = Flask(__name__)
-
+# привет
 telegram_app = Application.builder().token(TOKEN).build()
 
 def solve_by_discriminant(a, b, c):
